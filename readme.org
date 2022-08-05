@@ -1,0 +1,5 @@
+* powerLawTurbulentVelocity
+* Referencias
+Nina Gall Jorgensen 2012. Implementation of a turbulent inflow boundary condition for LES based on a vortex method.
+- http://www.tfd.chalmers.se/~hani/kurser/OS_CFD_2012/NinaGallJorgensen/presentation.pdf
+- http://www.tfd.chalmers.se/~hani/kurser/OS_CFD_2012/NinaGallJorgensen/ReportReviewed.pdf
