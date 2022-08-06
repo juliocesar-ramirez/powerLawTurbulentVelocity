@@ -95,10 +95,15 @@ class powerLawTurbulentVelocityFvPatchVectorField
 
         //- Single valued scalar quantity, e.g. a coefficient
         scalar scalarData_;
+        scalar a_;
+        scalar alpha_;
+        scalar zref_;
 
         //- Single valued Type quantity, e.g. reference pressure pRefValue_
         //  Other options include vector, tensor
         vector data_;
+        vector n_;
+        vector y_;
 
         //- Field of Types, typically defined across patch faces
         //  e.g. total pressure p0_.  Other options include vectorField
@@ -116,75 +121,48 @@ class powerLawTurbulentVelocityFvPatchVectorField
         //- Boolean for true/false, e.g. specify if flow rate is volumetric_
         bool boolData_;
 
-
-    // Private Member Functions
+        // Private Member Functions
 
         //- Return current time
         scalar t() const;
 
+      public:
+        //- Runtime type information
+        TypeName("powerLawTurbulentVelocity");
 
-public:
-
-    //- Runtime type information
-    TypeName("powerLawTurbulentVelocity");
-
-
-    // Constructors
+        // Constructors
 
         //- Construct from patch and internal field
-        powerLawTurbulentVelocityFvPatchVectorField
-        (
-            const fvPatch&,
-            const DimensionedField<vector, volMesh>&
-        );
+        powerLawTurbulentVelocityFvPatchVectorField(
+            const fvPatch &, const DimensionedField<vector, volMesh> &);
 
         //- Construct from patch, internal field and dictionary
-        powerLawTurbulentVelocityFvPatchVectorField
-        (
-            const fvPatch&,
-            const DimensionedField<vector, volMesh>&,
-            const dictionary&
-        );
+        powerLawTurbulentVelocityFvPatchVectorField(
+            const fvPatch &, const DimensionedField<vector, volMesh> &,
+            const dictionary &);
 
         //- Construct by mapping given fixedValueTypeFvPatchField
         //  onto a new patch
-        powerLawTurbulentVelocityFvPatchVectorField
-        (
-            const powerLawTurbulentVelocityFvPatchVectorField&,
-            const fvPatch&,
-            const DimensionedField<vector, volMesh>&,
-            const fvPatchFieldMapper&
-        );
+        powerLawTurbulentVelocityFvPatchVectorField(
+            const powerLawTurbulentVelocityFvPatchVectorField &,
+            const fvPatch &, const DimensionedField<vector, volMesh> &,
+            const fvPatchFieldMapper &);
 
         //- Disallow copy without setting internal field reference
-        powerLawTurbulentVelocityFvPatchVectorField
-        (
-            const powerLawTurbulentVelocityFvPatchVectorField&
-        ) = delete;
+        powerLawTurbulentVelocityFvPatchVectorField(
+            const powerLawTurbulentVelocityFvPatchVectorField &) = delete;
 
         //- Copy constructor setting internal field reference
-        powerLawTurbulentVelocityFvPatchVectorField
-        (
-            const powerLawTurbulentVelocityFvPatchVectorField&,
-            const DimensionedField<vector, volMesh>&
-        );
+        powerLawTurbulentVelocityFvPatchVectorField(
+            const powerLawTurbulentVelocityFvPatchVectorField &,
+            const DimensionedField<vector, volMesh> &);
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchVectorField> clone
-        (
-            const DimensionedField<vector, volMesh>& iF
-        ) const
-        {
-            return tmp<fvPatchVectorField>
-            (
-                new powerLawTurbulentVelocityFvPatchVectorField
-                (
-                    *this,
-                    iF
-                )
-            );
+        virtual tmp<fvPatchVectorField>
+        clone(const DimensionedField<vector, volMesh> &iF) const {
+          return tmp<fvPatchVectorField>(
+              new powerLawTurbulentVelocityFvPatchVectorField(*this, iF));
         }
-
 
     // Member Functions
 

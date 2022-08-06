@@ -40,92 +40,58 @@ Foam::scalar Foam::powerLawTurbulentVelocityFvPatchVectorField::t() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::powerLawTurbulentVelocityFvPatchVectorField::
-powerLawTurbulentVelocityFvPatchVectorField
-(
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF
-)
-:
-    fixedValueFvPatchVectorField(p, iF),
-    scalarData_(0.0),
-    data_(Zero),
-    fieldData_(p.size(), Zero),
-    timeVsData_(),
-    wordData_("wordDefault"),
-    labelData_(-1),
-    boolData_(false)
-{
+    powerLawTurbulentVelocityFvPatchVectorField(
+        const fvPatch &p, const DimensionedField<vector, volMesh> &iF)
+    : fixedValueFvPatchVectorField(p, iF), scalarData_(0.0), a_(0.0),
+      alpha_(0.0), zref_(0.0), data_(Zero), n_(Zero), y_(Zero),
+      fieldData_(p.size(), Zero), timeVsData_(), wordData_("wordDefault"),
+      labelData_(-1), boolData_(false) {}
+
+Foam::powerLawTurbulentVelocityFvPatchVectorField::
+    powerLawTurbulentVelocityFvPatchVectorField(
+        const fvPatch &p, const DimensionedField<vector, volMesh> &iF,
+        const dictionary &dict)
+    : fixedValueFvPatchVectorField(p, iF),
+      scalarData_(dict.lookup<scalar>("scalarData")),
+      a_(dict.lookup<scalar>("a")), alpha_(dict.lookup<scalar>("alpha")),
+      zref_(dict.lookup<scalar>("zref")), data_(dict.lookup<vector>("data")),
+      n_(dict.lookup<vector>("n")), y_(dict.lookup<vector>("y")),
+      fieldData_("fieldData", dict, p.size()),
+      timeVsData_(Function1<vector>::New("timeVsData", dict)),
+      wordData_(dict.lookupOrDefault<word>("wordName", "wordDefault")),
+      labelData_(-1), boolData_(false) {
+
+  fixedValueFvPatchVectorField::evaluate();
+
+  /*
+  // Initialise with the value entry if evaluation is not possible
+  fvPatchVectorField::operator=
+  (
+      vectorField("value", dict, p.size())
+  );
+  */
 }
 
+Foam::powerLawTurbulentVelocityFvPatchVectorField::
+    powerLawTurbulentVelocityFvPatchVectorField(
+        const powerLawTurbulentVelocityFvPatchVectorField &ptf,
+        const fvPatch &p, const DimensionedField<vector, volMesh> &iF,
+        const fvPatchFieldMapper &mapper)
+    : fixedValueFvPatchVectorField(ptf, p, iF, mapper),
+      scalarData_(ptf.scalarData_), a_(ptf.a_), alpha_(ptf.alpha_),
+      zref_(ptf.zref_), data_(ptf.data_), n_(ptf.n_), y_(ptf.y_),
+      fieldData_(mapper(ptf.fieldData_)), timeVsData_(ptf.timeVsData_, false),
+      wordData_(ptf.wordData_), labelData_(-1), boolData_(ptf.boolData_) {}
 
 Foam::powerLawTurbulentVelocityFvPatchVectorField::
-powerLawTurbulentVelocityFvPatchVectorField
-(
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    fixedValueFvPatchVectorField(p, iF),
-    scalarData_(dict.lookup<scalar>("scalarData")),
-    data_(dict.lookup<vector>("data")),
-    fieldData_("fieldData", dict, p.size()),
-    timeVsData_(Function1<vector>::New("timeVsData", dict)),
-    wordData_(dict.lookupOrDefault<word>("wordName", "wordDefault")),
-    labelData_(-1),
-    boolData_(false)
-{
-
-
-    fixedValueFvPatchVectorField::evaluate();
-
-    /*
-    // Initialise with the value entry if evaluation is not possible
-    fvPatchVectorField::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
-    */
-}
-
-
-Foam::powerLawTurbulentVelocityFvPatchVectorField::
-powerLawTurbulentVelocityFvPatchVectorField
-(
-    const powerLawTurbulentVelocityFvPatchVectorField& ptf,
-    const fvPatch& p,
-    const DimensionedField<vector, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchVectorField(ptf, p, iF, mapper),
-    scalarData_(ptf.scalarData_),
-    data_(ptf.data_),
-    fieldData_(mapper(ptf.fieldData_)),
-    timeVsData_(ptf.timeVsData_, false),
-    wordData_(ptf.wordData_),
-    labelData_(-1),
-    boolData_(ptf.boolData_)
-{}
-
-
-Foam::powerLawTurbulentVelocityFvPatchVectorField::
-powerLawTurbulentVelocityFvPatchVectorField
-(
-    const powerLawTurbulentVelocityFvPatchVectorField& ptf,
-    const DimensionedField<vector, volMesh>& iF
-)
-:
-    fixedValueFvPatchVectorField(ptf, iF),
-    scalarData_(ptf.scalarData_),
-    data_(ptf.data_),
-    fieldData_(ptf.fieldData_),
-    timeVsData_(ptf.timeVsData_, false),
-    wordData_(ptf.wordData_),
-    labelData_(-1),
-    boolData_(ptf.boolData_)
-{}
-
+    powerLawTurbulentVelocityFvPatchVectorField(
+        const powerLawTurbulentVelocityFvPatchVectorField &ptf,
+        const DimensionedField<vector, volMesh> &iF)
+    : fixedValueFvPatchVectorField(ptf, iF), scalarData_(ptf.scalarData_),
+      a_(ptf.a_), alpha_(ptf.alpha_), zref_(ptf.zref_), data_(ptf.data_),
+      n_(ptf.n_), y_(ptf.y_), fieldData_(ptf.fieldData_),
+      timeVsData_(ptf.timeVsData_, false), wordData_(ptf.wordData_),
+      labelData_(-1), boolData_(ptf.boolData_) {}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -164,8 +130,6 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::updateCoeffs()
     fixedValueFvPatchVectorField::operator==
     (
         data_
-      + fieldData_
-      + scalarData_*timeVsData_->value(t())
     );
 
 
@@ -179,8 +143,13 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
+    writeEntry(os, "a", a_);
+    writeEntry(os, "alpha", alpha_);
+    writeEntry(os, "zref", zref_);
     writeEntry(os, "scalarData", scalarData_);
     writeEntry(os, "data", data_);
+    writeEntry(os, "n", n_);
+    writeEntry(os, "y", y_);
     writeEntry(os, "fieldData", fieldData_);
     writeEntry(os, timeVsData_());
     writeEntry(os, "wordData", wordData_);

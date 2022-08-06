@@ -1,5 +1,12 @@
-* powerLawTurbulentVelocity
+* Power Law Turbulent Velocity
+Condición de borde de entrada de velocidad con un campo de velocidad turbulenta mediante la teoria de Metodo de Vortices.
 * Referencias
 Nina Gall Jorgensen 2012. Implementation of a turbulent inflow boundary condition for LES based on a vortex method.
 - http://www.tfd.chalmers.se/~hani/kurser/OS_CFD_2012/NinaGallJorgensen/presentation.pdf
 - http://www.tfd.chalmers.se/~hani/kurser/OS_CFD_2012/NinaGallJorgensen/ReportReviewed.pdf
+  
+M. Emmanuel Sergent 2002. Vers une méthodologie de couplage entre la Simulation des Grande s Echelles et les modèles statistiques 
+- https://bibli.ec-lyon.fr/exl-doc/esergent.pdf
+
+Fabrice Mathey 2006. Assessment of the vortex method for Large Eddy Simulation inlet conditions
+- https://d1wqtxts1xzle7.cloudfront.net/36536868/PCFD_61-3_Paper_06-with-cover-page-v2.pdf?Expires=1659817559&Signature=cQWIYd18F4NJrP56GsG7~o75K1PnLZ7vgqoFRwF5SC8-UdEK6FrjjJ5F9tHIA5EfziWwDMQM~vJSQgzE3i~a5i-NrWxzguJgOLrl7LwahaFocoXDOxCHoLHoPpsBTKF5em4wAbBROZz2h-jOFUuvwJiGFX-Yf0sct6brzOllldkpv1vUeqVbS2jkNzaEjfTjCWllz9cUVsjpxrY~MH14iYFSpuRV4b1DE1EmWcUdNVwyR~emeiJIllSNvhkd~WqDI61N17IPr9GujsG2wDDWaNfZR3cmLeo9KTsjHt~xGpsvRFbS-607BjfcH2nZTMEvOZZxeq7CM5dWPP-X6RhqVQ__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA
