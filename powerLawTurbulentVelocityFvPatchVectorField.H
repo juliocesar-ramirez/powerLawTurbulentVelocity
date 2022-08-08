@@ -96,6 +96,7 @@ class powerLawTurbulentVelocityFvPatchVectorField
     scalar a_;
     scalar alpha_;
     scalar zref_;
+    scalar N_;
 
     //- Single valued Type quantity, e.g. reference pressure pRefValue_
     //  Other options include vector, tensor

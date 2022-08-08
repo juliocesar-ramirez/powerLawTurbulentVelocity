@@ -55,7 +55,7 @@ Foam::powerLawTurbulentVelocityFvPatchVectorField::
     powerLawTurbulentVelocityFvPatchVectorField(
         const fvPatch &p, const DimensionedField<vector, volMesh> &iF)
     : fixedValueFvPatchVectorField(p, iF), a_(0.0), alpha_(0.0), zref_(0.0),
-      n_(Zero), y_(Zero) , wordData_("wordDefault"), labelData_(-1),
+      N_(0.0), n_(Zero), y_(Zero), wordData_("wordDefault"), labelData_(-1),
       boolData_(false) {}
 
 Foam::powerLawTurbulentVelocityFvPatchVectorField::
@@ -64,6 +64,7 @@ Foam::powerLawTurbulentVelocityFvPatchVectorField::
         const dictionary &dict)
     : fixedValueFvPatchVectorField(p, iF), a_(dict.lookup<scalar>("a")),
       alpha_(dict.lookup<scalar>("alpha")), zref_(dict.lookup<scalar>("zref")),
+      N_(dict.lookup<scalar>("N")),
       n_(dict.lookup<vector>("n")), y_(dict.lookup<vector>("y")),
       wordData_(dict.lookupOrDefault<word>("wordName", "wordDefault")),
       labelData_(-1), boolData_(false) {
@@ -85,7 +86,7 @@ Foam::powerLawTurbulentVelocityFvPatchVectorField::
         const fvPatch &p, const DimensionedField<vector, volMesh> &iF,
         const fvPatchFieldMapper &mapper)
     : fixedValueFvPatchVectorField(ptf, p, iF, mapper), a_(ptf.a_),
-      alpha_(ptf.alpha_), zref_(ptf.zref_), n_(ptf.n_), y_(ptf.y_) ,
+      alpha_(ptf.alpha_), zref_(ptf.zref_),N_(ptf.N_), n_(ptf.n_), y_(ptf.y_) ,
       wordData_(ptf.wordData_), labelData_(-1), boolData_(ptf.boolData_) {}
 
 Foam::powerLawTurbulentVelocityFvPatchVectorField::
@@ -93,7 +94,7 @@ Foam::powerLawTurbulentVelocityFvPatchVectorField::
         const powerLawTurbulentVelocityFvPatchVectorField &ptf,
         const DimensionedField<vector, volMesh> &iF)
     : fixedValueFvPatchVectorField(ptf, iF), a_(ptf.a_), alpha_(ptf.alpha_),
-      zref_(ptf.zref_), n_(ptf.n_), y_(ptf.y_), wordData_(ptf.wordData_),
+      zref_(ptf.zref_),N_(ptf.N_), n_(ptf.n_), y_(ptf.y_), wordData_(ptf.wordData_),
       labelData_(-1), boolData_(ptf.boolData_) {}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -128,13 +129,12 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::updateCoeffs()
 
     vectorField cellxyz = patch().Cf();
     scalarField celly = cellxyz & y_;
-
     // power law
     vectorField Upl = n_ * a_ * pow(celly, alpha_);
-    vectorField Ut;
+    vectorField Ut = Upl * 0;
     // velocidad turbulenta
     scalarField Af = patch().magSf();
-    scalar A=gSum(Af);
+    scalar A = gSum(Af);
 
     boundBox bb(patch().patch().localPoints(), true);
     vector bmax = bb.max();
@@ -145,9 +145,11 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::updateCoeffs()
     scalar sigma = 0.1 * L / 2;
     scalar sigma2 = 2 * sqr(sigma);
 
-    scalar z0=zref_/exp(1/alpha_);
-    scalarField Iu=1/(log(celly/1));
-    scalarField k=1.5*pow(Upl.component(0),2)*pow(Iu,2);
+    scalar z0 = zref_ / exp(1 / alpha_);
+    scalarField Iu = 1 / (log(celly / z0));
+    scalarField k = 1.5 * pow(Upl.component(0), 2) * pow(Iu, 2);
+    scalar a = 0.0;
+    vector z1 = vector(1, 0, 0);
 
     forAll(patch(), facei) {
       vector cell = cellxyz[facei];
@@ -155,31 +157,44 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::updateCoeffs()
       scalar cellz = cell[2];
 
       srand(time(NULL));
-      vector Utx = Zero;
-      vector z1 = vector(1, 0, 0);
-      for (int i = 0; i < cellxyz.size(); i++) {
+      vector Utx = vector(0, 0, 0);
+      for (int i = 0; i < N_; i++) {
           // valores indices del patch random
         int random = rand() % cellxyz.size();
+
         vector xi = cellxyz[random];
+        if (xi == cell) {
+          scalar lxi = sqrt(patch().magSf()[i]);
+          scalar add = 0.1 * lxi;
+          xi[1] = xi[1] + add;
+          xi[2] = xi[2] + add;
+        }
         scalar xiy = xi[1];
         scalar xiz = xi[2];
         scalar dist = sqr(celly - xiy) + sqr(cellz - xiz);
         scalar ks = k[random];
-        scalar circulacion = 4 *
-                             sqrt(Foam::constant::mathematical::pi * A * ks) /
-            (3 * (2 * log(3.0) - 3 * log(2.0)));
-        Utx += (1 / (Foam::constant::mathematical::twoPi)) * circulacion *
-            ((xi - cell) ^ z1 / dist) * (1 - exp(-dist / sigma2)) *
-               exp(-dist / sigma2);
-      }
-      Ut[facei] = Utx;
-    }
+        scalar circulacion =
+            4 * sqrt(Foam::constant::mathematical::pi * A * ks) /
+            (3 * N_ * (2 * log(3.0) - 3 * log(2.0)));
 
+	scalar delta = sqrt(patch().magSf()[random]); //Delta calculated from face area
+	if (sigma <= delta)
+	{
+	sigma = delta; 
+	sigma2 = 2*sqr(sigma);
+	}
+
+        Utx += (1 / (Foam::constant::mathematical::twoPi)) * circulacion *
+            (((xi - cell) ^ z1)/dist) * (1 - exp(-dist / sigma2)) *
+            exp(-dist / sigma2);
+      }
+      Ut[facei] =  Utx;
+    }
 
     fixedValueFvPatchVectorField::operator==(Upl + Ut);
 
     fixedValueFvPatchVectorField::updateCoeffs();
-}
+    }
 
 void Foam::powerLawTurbulentVelocityFvPatchVectorField::write
 (
@@ -190,6 +205,7 @@ void Foam::powerLawTurbulentVelocityFvPatchVectorField::write
     writeEntry(os, "a", a_);
     writeEntry(os, "alpha", alpha_);
     writeEntry(os, "zref", zref_);
+    writeEntry(os, "N", N_);
     writeEntry(os, "n", n_);
     writeEntry(os, "y", y_);
     writeEntry(os, "wordData", wordData_);
