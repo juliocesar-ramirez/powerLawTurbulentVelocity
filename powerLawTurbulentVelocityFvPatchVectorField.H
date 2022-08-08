@@ -102,12 +102,8 @@ class powerLawTurbulentVelocityFvPatchVectorField
     vector n_;
     vector y_;
 
-    //- Field of Types, typically defined across patch faces
-    //  e.g. total pressure p0_.  Other options include vectorField
-    vectorField fieldData_;
 
     //- Type specified as a function of time for time-varying BCs
-    autoPtr<Function1<vector>> timeVsData_;
 
     //- Word entry, e.g. pName_ for name of the pressure field on database
     word wordData_;
