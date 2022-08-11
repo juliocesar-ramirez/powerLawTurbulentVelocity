@@ -1,5 +1,5 @@
 * Power Law Turbulent Velocity
-Condición de borde de entrada de velocidad con un campo de velocidad turbulenta mediante la teoria de Metodo de Vortices.
+Condición de borde de entrada de velocidad con un campo de velocidad turbulenta mediante la teoría del Método de Vórtices.
 * Referencias
 Nina Gall Jorgensen 2012. Implementation of a turbulent inflow boundary condition for LES based on a vortex method.
 - http://www.tfd.chalmers.se/~hani/kurser/OS_CFD_2012/NinaGallJorgensen/presentation.pdf
